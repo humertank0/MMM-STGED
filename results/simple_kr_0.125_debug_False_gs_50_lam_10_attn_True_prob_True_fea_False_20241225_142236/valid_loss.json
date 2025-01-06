@@ -1,0 +1,1 @@
+{"valid_ttl_loss": [NaN, NaN], "valid_id_acc1": [0.0, 0.0], "valid_id_recall": [0.0, 0.0], "valid_id_precision": [0.0, 0.0], "valid_rate_loss": [NaN, NaN], "valid_dis_mae_loss": [NaN, NaN], "valid_dis_rmse_loss": [NaN, NaN], "valid_dis_rn_mae_loss": [NaN, NaN], "valid_dis_rn_rmse_loss": [NaN, NaN], "valid_id_loss": [NaN, NaN]}

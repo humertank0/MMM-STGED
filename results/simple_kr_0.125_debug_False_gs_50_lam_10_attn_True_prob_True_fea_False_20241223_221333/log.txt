@@ -1,0 +1,76 @@
+2024-12-23 22:13:34,485 INFO {'module_type': 'simple', 'debug': False, 'device': device(type='cpu'), 'load_pretrained_flag': False, 'model_old_path': '', 'train_flag': True, 'test_flag': True, 'attn_flag': True, 'dis_prob_mask_flag': True, 'search_dist': 50, 'beta': 15, 'tandem_fea_flag': False, 'pro_features_flag': False, 'online_features_flag': False, 'rid_fea_dim': 8, 'pro_input_dim': 25, 'pro_output_dim': 8, 'poi_num': 5, 'online_dim': 10, 'poi_type': 'company,food,shopping,viewpoint,house', 'user_num': 442, 'min_lat': 41.142, 'min_lng': -8.652, 'max_lat': 41.174, 'max_lng': -8.578, 'keep_ratio': 0.125, 'grid_size': 50, 'time_span': 15, 'win_size': 25, 'ds_type': 'uniform', 'split_flag': False, 'shuffle': True, 'input_dim': 3, 'hid_dim': 512, 'id_emb_dim': 128, 'dropout': 0.5, 'id_size': 2225, 'lambda1': 10, 'n_epochs': 20, 'top_K': 10, 'batch_size': 128, 'learning_rate': 0.001, 'tf_ratio': 0.5, 'clip': 1, 'log_step': 1, 'max_xid': 72, 'max_yid': 127}
+2024-12-23 22:13:34,753 INFO Finish data preparing.
+2024-12-23 22:13:34,753 INFO training dataset shape: 67
+2024-12-23 22:13:34,753 INFO validation dataset shape: 55
+2024-12-23 22:13:34,753 INFO test dataset shape: 56
+2024-12-23 22:13:34,876 INFO modelMM_STGED(
+  (encoder): Encoder(
+    (input_cat): Linear(in_features=128, out_features=512, bias=False)
+    (relu): ReLU(inplace=True)
+    (rnn): GRU(3, 512)
+    (dropout): Dropout(p=0.5, inplace=False)
+  )
+  (decoder): DecoderMulti(
+    (emb_id): Embedding(2225, 128)
+    (tandem_fc): Sequential(
+      (0): Linear(in_features=640, out_features=512, bias=True)
+      (1): ReLU()
+    )
+    (user_embedding): Embedding(442, 10)
+    (user_merge_layer): Sequential(
+      (0): Linear(in_features=586, out_features=512, bias=True)
+    )
+    (attn): Attention(
+      (attn): Linear(in_features=1024, out_features=512, bias=True)
+      (v): Linear(in_features=512, out_features=1, bias=False)
+    )
+    (rnn): GRU(705, 512)
+    (fc_id_out): Linear(in_features=512, out_features=2225, bias=True)
+    (fc_rate_out): Linear(in_features=512, out_features=1, bias=True)
+    (dropout): Dropout(p=0.5, inplace=False)
+  )
+  (spatialTemporalConv): spatialTemporalConv(
+    (start_conv): Conv2d(1, 64, kernel_size=(1, 1), stride=(1, 1))
+    (spatial_conv): Sequential(
+      (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU(inplace=True)
+      (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (3): ReLU(inplace=True)
+      (4): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+    (temporal_conv): Sequential(
+      (0): Conv1d(64, 64, kernel_size=(3,), stride=(1,), padding=(1,))
+      (1): ReLU(inplace=True)
+    )
+  )
+  (dropout): Dropout(p=0.3, inplace=False)
+  (fc_rate_out): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=512, out_features=1, bias=True)
+  )
+  (encoder_out): Sequential(
+    (0): Linear(in_features=576, out_features=512, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (encoder_point_cat): Sequential(
+    (0): Linear(in_features=576, out_features=512, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (mygcn): my_GCN(
+    (linear1): Linear(in_features=512, out_features=512, bias=False)
+    (linear2): Linear(in_features=512, out_features=512, bias=False)
+    (wh): Linear(in_features=512, out_features=512, bias=False)
+    (wtime): Linear(in_features=512, out_features=512, bias=False)
+    (wloca): Linear(in_features=512, out_features=512, bias=False)
+    (bn): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (relu): ReLU(inplace=True)
+    (edge_merge): Edge_merge(
+      (Z): Linear(in_features=2, out_features=512, bias=True)
+      (H): Linear(in_features=512, out_features=512, bias=True)
+    )
+    (w_edge): Linear(in_features=512, out_features=512, bias=False)
+  )
+)

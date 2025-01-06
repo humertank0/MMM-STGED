@@ -1,0 +1,156 @@
+2024-12-25 14:35:40,694 INFO {'module_type': 'simple', 'debug': False, 'device': device(type='cuda'), 'load_pretrained_flag': False, 'model_old_path': '', 'train_flag': True, 'test_flag': True, 'attn_flag': True, 'dis_prob_mask_flag': True, 'search_dist': 50, 'beta': 15, 'tandem_fea_flag': False, 'pro_features_flag': False, 'online_features_flag': False, 'rid_fea_dim': 8, 'pro_input_dim': 25, 'pro_output_dim': 8, 'poi_num': 5, 'online_dim': 10, 'poi_type': 'company,food,shopping,viewpoint,house', 'user_num': 442, 'min_lat': 41.142, 'min_lng': -8.652, 'max_lat': 41.174, 'max_lng': -8.578, 'keep_ratio': 0.125, 'grid_size': 50, 'time_span': 15, 'win_size': 25, 'ds_type': 'uniform', 'split_flag': False, 'shuffle': True, 'input_dim': 3, 'hid_dim': 512, 'id_emb_dim': 128, 'dropout': 0.5, 'id_size': 2225, 'lambda1': 10, 'n_epochs': 20, 'top_K': 10, 'batch_size': 128, 'learning_rate': 0.001, 'tf_ratio': 0.5, 'clip': 1, 'log_step': 1, 'max_xid': 72, 'max_yid': 127}
+2024-12-25 14:35:40,972 INFO Finish data preparing.
+2024-12-25 14:35:40,972 INFO training dataset shape: 67
+2024-12-25 14:35:40,973 INFO validation dataset shape: 55
+2024-12-25 14:35:40,973 INFO test dataset shape: 56
+2024-12-25 14:35:41,256 INFO modelMM_STGED(
+  (encoder): Encoder(
+    (input_cat): Linear(in_features=128, out_features=512, bias=False)
+    (relu): ReLU(inplace=True)
+    (rnn): GRU(3, 512)
+    (dropout): Dropout(p=0.5, inplace=False)
+  )
+  (decoder): DecoderMulti(
+    (emb_id): Embedding(2225, 128)
+    (tandem_fc): Sequential(
+      (0): Linear(in_features=640, out_features=512, bias=True)
+      (1): ReLU()
+    )
+    (user_embedding): Embedding(442, 10)
+    (user_merge_layer): Sequential(
+      (0): Linear(in_features=586, out_features=512, bias=True)
+    )
+    (attn): Attention(
+      (attn): Linear(in_features=1024, out_features=512, bias=True)
+      (v): Linear(in_features=512, out_features=1, bias=False)
+    )
+    (rnn): GRU(705, 512)
+    (fc_id_out): Linear(in_features=512, out_features=2225, bias=True)
+    (fc_rate_out): Linear(in_features=512, out_features=1, bias=True)
+    (dropout): Dropout(p=0.5, inplace=False)
+  )
+  (spatialTemporalConv): spatialTemporalConv(
+    (start_conv): Conv2d(1, 64, kernel_size=(1, 1), stride=(1, 1))
+    (spatial_conv): Sequential(
+      (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU(inplace=True)
+      (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (3): ReLU(inplace=True)
+      (4): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+    (temporal_conv): Sequential(
+      (0): Conv1d(64, 64, kernel_size=(3,), stride=(1,), padding=(1,))
+      (1): ReLU(inplace=True)
+    )
+  )
+  (dropout): Dropout(p=0.3, inplace=False)
+  (fc_rate_out): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=512, out_features=1, bias=True)
+  )
+  (encoder_out): Sequential(
+    (0): Linear(in_features=576, out_features=512, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (encoder_point_cat): Sequential(
+    (0): Linear(in_features=576, out_features=512, bias=True)
+    (1): ReLU(inplace=True)
+    (2): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (mygcn): my_GCN(
+    (linear1): Linear(in_features=512, out_features=512, bias=False)
+    (linear2): Linear(in_features=512, out_features=512, bias=False)
+    (wh): Linear(in_features=512, out_features=512, bias=False)
+    (wtime): Linear(in_features=512, out_features=512, bias=False)
+    (wloca): Linear(in_features=512, out_features=512, bias=False)
+    (bn): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (relu): ReLU(inplace=True)
+    (edge_merge): Edge_merge(
+      (Z): Linear(in_features=2, out_features=512, bias=True)
+      (H): Linear(in_features=512, out_features=512, bias=True)
+    )
+    (w_edge): Linear(in_features=512, out_features=512, bias=False)
+  )
+)
+2024-12-25 14:36:05,692 INFO Epoch: 1 Time: 0m23s
+2024-12-25 14:36:05,728 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:36:05,728 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:36:05,728 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:36:29,120 INFO Epoch: 2 Time: 0m23s
+2024-12-25 14:36:29,121 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:36:29,121 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:36:29,121 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:36:52,206 INFO Epoch: 3 Time: 0m23s
+2024-12-25 14:36:52,208 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:36:52,208 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:36:52,208 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:37:15,017 INFO Epoch: 4 Time: 0m22s
+2024-12-25 14:37:15,019 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:37:15,019 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:37:15,019 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:37:38,066 INFO Epoch: 5 Time: 0m23s
+2024-12-25 14:37:38,067 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:37:38,068 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:37:38,068 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:38:00,995 INFO Epoch: 6 Time: 0m22s
+2024-12-25 14:38:00,997 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:38:00,997 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:38:00,997 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:38:23,915 INFO Epoch: 7 Time: 0m22s
+2024-12-25 14:38:23,918 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:38:23,918 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:38:23,918 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:38:46,873 INFO Epoch: 8 Time: 0m22s
+2024-12-25 14:38:46,876 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:38:46,876 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:38:46,876 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:39:09,958 INFO Epoch: 9 Time: 0m23s
+2024-12-25 14:39:09,960 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:39:09,960 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:39:09,960 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:39:32,983 INFO Epoch: 10 Time: 0m22s
+2024-12-25 14:39:32,984 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:39:32,984 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:39:32,984 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:39:56,097 INFO Epoch: 11 Time: 0m23s
+2024-12-25 14:39:56,099 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:39:56,099 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:39:56,099 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:40:19,156 INFO Epoch: 12 Time: 0m23s
+2024-12-25 14:40:19,157 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:40:19,157 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:40:19,157 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:40:42,431 INFO Epoch: 13 Time: 0m23s
+2024-12-25 14:40:42,434 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:40:42,434 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:40:42,434 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:41:05,162 INFO Epoch: 14 Time: 0m22s
+2024-12-25 14:41:05,165 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:41:05,165 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:41:05,165 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:41:28,224 INFO Epoch: 15 Time: 0m23s
+2024-12-25 14:41:28,226 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:41:28,226 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:41:28,226 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:41:51,122 INFO Epoch: 16 Time: 0m22s
+2024-12-25 14:41:51,124 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:41:51,124 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:41:51,124 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:42:14,133 INFO Epoch: 17 Time: 0m22s
+2024-12-25 14:42:14,135 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:42:14,135 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:42:14,135 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:42:37,227 INFO Epoch: 18 Time: 0m23s
+2024-12-25 14:42:37,229 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:42:37,229 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:42:37,229 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:43:00,236 INFO Epoch: 19 Time: 0m22s
+2024-12-25 14:43:00,237 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:43:00,237 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:43:00,237 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
+2024-12-25 14:43:23,183 INFO Epoch: 20 Time: 0m22s
+2024-12-25 14:43:23,185 INFO log_vars:[tensor([1.], device='cuda:0', grad_fn=<PowBackward0>), tensor([1.], device='cuda:0', grad_fn=<PowBackward0>)]
+2024-12-25 14:43:23,185 INFO 	Train Loss:nan	Train RID Acc1:0.0	Train RID Recall:0.0	Train RID Precision:0.0	Train Rate Loss:nan	Train RID Loss:nan
+2024-12-25 14:43:23,185 INFO 	Valid Loss:nan	Valid RID Acc1:0.0	Valid RID Recall:0.0	Valid RID Precision:0.0	Valid Distance MAE Loss:nan	Valid Distance RMSE Loss:nan	Valid Distance RN MAE Loss:nan	Valid Distance RN RMSE Loss:nan	Valid Rate Loss:nan	Valid RID Loss:nan
