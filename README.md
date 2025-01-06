@@ -1,3 +1,7 @@
+**This [code](https://github.com/wtl52656/MM-STGED) will be re-developed, here is the original author's description:**
+
+
+
 ## MM-STGED
 
 Source code of TKDE:  Micro-Macro Spatial-Temporal Graph-based  Encoder-Decoder for Map-Constrained Trajectory Recovery
