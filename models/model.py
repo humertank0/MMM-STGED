@@ -7,6 +7,13 @@ from copy import deepcopy
 
 # 计算带有掩码的对数softmax值，默认值是true
 def mask_log_softmax(x, mask, log_flag=True):
+    """
+    计算带掩码的对数softmax值
+    参数:
+    x: 输入张量
+    mask: 掩码张量
+    log_flag: 是否返回对数概率
+    """
     maxes = torch.max(x, 1, keepdim=True)[0]
     x_exp = torch.exp(x - maxes) * mask
     x_exp_sum = torch.sum(x_exp, 1, keepdim=True)
@@ -116,7 +123,7 @@ class Encoder(nn.Module):
         return outputs, hidden
 
 
-# 简单的注意力机制，线性变换计算k q v
+# 简单的注意力机制
 class attention(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(attention, self).__init__()

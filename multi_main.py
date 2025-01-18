@@ -1,24 +1,37 @@
+# 神经网络智能调参库NNI
 import nni
+
+
 import time
 from tqdm import tqdm
 import logging
 import sys
+# 用于解析命令行参数
 import argparse
 import pandas as pd
 import os
+
+# 设置GPU设备
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import torch
 import torch.optim as optim
 import numpy as np
+
+# 导入自定义模块
 from utils.utils import save_json_data, create_dir, load_pkl_data
 from common.mbr import MBR
 from common.spatial_func import SPoint, distance
 from common.road_network import load_rn_shp
 
 from utils.datasets import Dataset, collate_fn
+
+
 from models.model_utils import load_rn_dict, load_rid_freqs, get_rid_grid, get_poi_info, get_rn_info
 from models.model_utils import get_online_info_dict, epoch_time, AttrDict, get_rid_rnfea_dict
+
 from models.multi_train import evaluate, init_weights, train
+# 模型组件
 from models.model import MM_STGED, DecoderMulti, Encoder
 from build_graph import load_graph_adj_mtx, load_graph_node_features
 import warnings
@@ -26,7 +39,8 @@ import json
 warnings.filterwarnings("ignore", category=UserWarning)
 
 if __name__ == '__main__':
-    
+
+    debugger = True
     parser = argparse.ArgumentParser(description='Multi-task Traj Interp')
     parser.add_argument('--dataset', type=str, default='Porto',help='data set')
     parser.add_argument('--module_type', type=str, default='simple', help='module type')
@@ -196,12 +210,14 @@ if __name__ == '__main__':
     test_trajs_dir = "./data/{}/test/".format(opts.dataset)
 
     extra_info_dir = "./data/{}/extra_data/".format(opts.dataset)
-    rn_dir = extra_info_dir + "road_network/"
-    user_dir = json.load(open( extra_info_dir + "uid2index.json"))
-    SE_file = extra_info_dir + '{}_SE.txt'.format(opts.dataset)
-    condition_file = extra_info_dir + 'flow.npy'
-    road_file = extra_info_dir + 'TLG/graph_A.csv'
-    
+    rn_dir = extra_info_dir + "road_network/" # 路网文件
+    user_dir = json.load(open( extra_info_dir + "uid2index.json")) # 用户信息文件
+    SE_file = extra_info_dir + '{}_SE.txt'.format(opts.dataset) # 空间嵌入文件，表示地理位置信息，如经纬度坐标
+    condition_file = extra_info_dir + 'flow.npy' # 道路流量文件
+    road_file = extra_info_dir + 'TLG/graph_A.csv' # 道路图文件
+
+    # create model save path
+    # 使用串联rid特征
     if args.tandem_fea_flag:
         fea_flag = True
     else:
@@ -219,14 +235,17 @@ if __name__ == '__main__':
                         filemode='a+')
     # spatial embedding
     spatial_A = load_graph_adj_mtx(road_file)
+    # 创建全0矩阵，形状为(spatial_A.shape[0]+1, spatial_A.shape[1]+1)，相当于放到右下角
     spatial_A_trans = np.zeros((spatial_A.shape[0]+1, spatial_A.shape[1]+1)) + 1e-10
     spatial_A_trans[1:,1:] = spatial_A
 
+    # 交通流量按时间归一化
     road_condition = np.load(condition_file) # T, N, N
     for i in range(road_condition.shape[0]):
         maxn = road_condition[i].max()
         road_condition[i] = road_condition[i] / maxn
 
+    # 从一个文件中读取???数据，并将其存储在一个 NumPy 数组中
     f = open(SE_file, mode = 'r')
     lines = f.readlines()
     temp = lines[0].split(' ')
@@ -236,17 +255,22 @@ if __name__ == '__main__':
         temp = line.split(' ')
         index = int(temp[0])
         SE[index+1] = temp[1 :]
-    
     SE = torch.from_numpy(SE)
 
-    rn = load_rn_shp(rn_dir, is_directed=True)
-    raw_rn_dict = load_rn_dict(extra_info_dir, file_name='raw_rn_dict.json')
-    new2raw_rid_dict = load_rid_freqs(extra_info_dir, file_name='new2raw_rid.json')
+    # 加载道路网络和相关数据
+    rn = load_rn_shp(rn_dir, is_directed=True) # 加载shapefile格式的道路网络
+    raw_rn_dict = load_rn_dict(extra_info_dir, file_name='raw_rn_dict.json') # 加载原始道路网络字典
+    new2raw_rid_dict = load_rid_freqs(extra_info_dir, file_name='new2raw_rid.json') # 字符串到整数字典的映射
     raw2new_rid_dict = load_rid_freqs(extra_info_dir, file_name='raw2new_rid.json')
-    rn_dict = load_rn_dict(extra_info_dir, file_name='rn_dict.json')
+    rn_dict = load_rn_dict(extra_info_dir, file_name='rn_dict.json') # 加载处理后道路网络字典
 
-    mbr = MBR(args.min_lat, args.min_lng, args.max_lat, args.max_lng)
+    # 创建边界框并进行网格划分
+    mbr = MBR(args.min_lat, args.min_lng, args.max_lat, args.max_lng) # mbr: 创建一个边界框（Minimum Bounding Rectangle, MBR），
+    # 它定义了地图的地理范围，包括最小纬度 (args.min_lat)、最小经度 (args.min_lng)、最大纬度 (args.max_lat)
+    # 和最大经度 (args.max_lng)
     grid_rn_dict, max_xid, max_yid = get_rid_grid(mbr, args.grid_size, rn_dict)
+    # 对边界框进行网格划分，并返回一个字典，该字典包含每个网格内的道路ID信息。
+    # 同时返回网格的最大X坐标和Y坐标（即 max_xid 和 max_yid）。
     args_dict['max_xid'] = max_xid
     args_dict['max_yid'] = max_yid
     args.update(args_dict)
@@ -255,18 +279,24 @@ if __name__ == '__main__':
     with open(model_save_path+'logging.txt', 'a+') as f:
         f.write(str(args_dict))
         f.write('\n')
+    # 天气数据未提供
     # load features
     weather_dict = None #load_pkl_data(extra_info_dir, 'weather_dict.pkl')
+
+    # 加载在线特征，数据集没提供
     if args.online_features_flag:
+        # 加载POI数据
         grid_poi_df = pd.read_csv(extra_info_dir+'poi'+str(args.grid_size)+'.csv',index_col=[0,1])
         norm_grid_poi_dict = get_poi_info(grid_poi_df, args)
+        # 读取道路网格特征
         norm_grid_rnfea_dict = get_rn_info(rn, mbr, args.grid_size, grid_rn_dict, rn_dict)
+        # 组合特征
         online_features_dict = get_online_info_dict(grid_rn_dict, norm_grid_poi_dict, norm_grid_rnfea_dict, args)
     else:
         norm_grid_poi_dict, norm_grid_rnfea_dict, online_features_dict = None, None, None
     rid_features_dict = None
 
-    # load dataset
+    # 数据集创建
     train_dataset = Dataset(train_trajs_dir, user_dir, mbr=mbr, norm_grid_poi_dict=norm_grid_poi_dict,
                             norm_grid_rnfea_dict=norm_grid_rnfea_dict, weather_dict=weather_dict,
                             parameters=args, debug=debug)
@@ -276,9 +306,9 @@ if __name__ == '__main__':
     test_dataset = Dataset(test_trajs_dir, user_dir, mbr=mbr, norm_grid_poi_dict=norm_grid_poi_dict,
                            norm_grid_rnfea_dict=norm_grid_rnfea_dict, weather_dict=weather_dict,
                            parameters=args, debug=debug)
-    print('training dataset shape: ' + str(len(train_dataset)))
-    print('validation dataset shape: ' + str(len(valid_dataset)))
-    print('test dataset shape: ' + str(len(test_dataset)))
+    print('training dataset shape: ' + str(len(train_dataset))) # 67
+    print('validation dataset shape: ' + str(len(valid_dataset))) # 55
+    print('test dataset shape: ' + str(len(test_dataset))) # 56
 
     train_iterator = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size,
                                                  shuffle=args.shuffle, collate_fn=collate_fn,
@@ -302,10 +332,12 @@ if __name__ == '__main__':
         f.write('test dataset shape: ' + str(len(test_dataset)) + '\n')
 
 
+    # 模型设置
     enc = Encoder(args)
     dec = DecoderMulti(args)
     model = MM_STGED(enc, dec, args.hid_dim, args.max_xid, args.max_yid, args.top_K,device).to(device)
     model.apply(init_weights)  # learn how to init weights
+    print("pretrained_flag",args.load_pretrained_flag)
     if args.load_pretrained_flag:
         model.load_state_dict(torch.load(args.model_old_path + 'val-best-model.pt'))
 
@@ -432,7 +464,8 @@ if __name__ == '__main__':
                 save_json_data(dict_valid_loss, model_save_path, "valid_loss.json")
 
     if args.test_flag:
-        model.load_state_dict(torch.load(model_save_path + 'val-best-model.pt'))
+        # model.load_state_dict(torch.load(model_save_path + 'val-best-model.pt'))
+        model.load_state_dict(torch.load(model_save_path + 'train-mid-model.pt'))
         start_time = time.time()
         test_id_acc1, test_id_recall, test_id_precision, test_dis_mae_loss, test_dis_rmse_loss, \
         test_dis_rn_mae_loss, test_dis_rn_rmse_loss, test_rate_loss, test_id_loss = evaluate(model, spatial_A_trans, road_condition, SE, test_iterator,

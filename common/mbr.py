@@ -1,8 +1,13 @@
 from .spatial_func import distance, SPoint
 
+
 class MBR:
     """
     MBR creates the minimal bounding regions for users.
+    MBR 类用于表示和操作最小边界矩形，可以计算点是否在矩形内、
+    获取矩形的中心点、高度和宽度，并且能够以 WKT 格式输出。
+    此外，它还提供了从坐标集合中计算最小边界矩形以及加载和存储 MBR 对象的方法。
+    这些功能在处理地理空间数据时非常有用。
     """
     def __init__(self, min_lat, min_lng, max_lat, max_lng):
         self.min_lat = min_lat

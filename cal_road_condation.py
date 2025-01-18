@@ -56,7 +56,8 @@ def cal_flow(file_path):
                     res_data[hour, lng_index, lat_index] += 1
     return res_data
     
-# 生成路况数据
+# 生成路况数据,记录了每个时间段内各个网格单元的车辆流量，时间维度，经度，维度。数组形状为（24，64，64）。
+# 24代表24小时，64*64代表该区域划分为64*64个网格单元
 if __name__ == '__main__':
     dataset = "Porto"
     file_path = "./data/{}/train/".format(dataset)

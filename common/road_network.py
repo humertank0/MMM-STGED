@@ -124,6 +124,8 @@ class RoadNetwork(nx.DiGraph):
 
 
 def load_rn_shp(path, is_directed=True):
+    # 初始化一个 Rtree 对象用于空间索引。
+    # 初始化一个字典 edge_idx 来存储每个边的节点对。
     edge_spatial_idx = Rtree()
     edge_idx = {}
     # node uses coordinate as key
@@ -132,11 +134,16 @@ def load_rn_shp(path, is_directed=True):
     if not is_directed:
         g = g.to_undirected()
     # node attrs: nid, pt, ...
+    # 遍历图中的每个节点，将其坐标存储为 SPoint 对象，并删除不必要的属性 'ShpName'
     for n, data in g.nodes(data=True):
         data['pt'] = SPoint(n[1], n[0])
         if 'ShpName' in data:
             del data['ShpName']
     # edge attrs: eid, length, coords, ...
+    # 遍历图中的每个边，将其几何信息转换为 OpenGIS 通用格式。
+    # 提取边的坐标并存储在 coords 列表中。
+    # 计算边的长度，并将这些属性添加到边的数据字典中。
+    # 插入空间索引和边缘索引字典。
     for u, v, data in g.edges(data=True):
         geom_line = ogr.CreateGeometryFromWkb(data['Wkb'])
         coords = []

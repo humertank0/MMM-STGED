@@ -333,6 +333,7 @@ def get_poi_info(grid_poi_df, parameters):
 # Use for extracting RN features
 #
 #####################################################################################################
+# 读取路网的边列表，取首尾坐标作为边
 def get_edge_results(eids, rn_dict):
     edge_results = []
     for eid in eids:
@@ -340,7 +341,7 @@ def get_edge_results(eids, rn_dict):
         v = rn_dict[eid]['coords'][-1]
         edge_results.append(((u.lng,u.lat),(v.lng,v.lat)))
     return edge_results
-
+# 从边列表中提取单个道路网络特征，包括总长度、交叉点数量和各级道路计数
 def extract_single_rn_features(edge_results, rn):
     part_g = nx.Graph()
     for u, v in edge_results:
@@ -370,6 +371,13 @@ def extract_single_rn_features(edge_results, rn):
 def get_rn_info(rn, mbr, grid_size, grid_rn_dict, rn_dict):
     """
     rn_dict contains rn information
+    功能：根据给定的道路网络信息提取每个网格单元内的道路特征，并进行标准化。
+    参数：
+    rn: 道路网络
+    mbr: 包含最大和最小经纬度的边界框（Minimum Bounding Rectangle）
+    grid_size: 网格大小
+    grid_rn_dict: 每个网格内包含的道路 ID 列表
+    rn_dict: 道路信息字典
     """
     LAT_PER_METER = 8.993203677616966e-06
     LNG_PER_METER = 1.1700193970443768e-05
@@ -401,6 +409,7 @@ def get_rn_info(rn, mbr, grid_size, grid_rn_dict, rn_dict):
         
     return norm_grid_rnfea_dict
 
+# 根据给定的参数和道路网络字典提取每个道路 ID 对应的特征，并进行标准化。
 def get_rid_rnfea_dict(rn_dict, parameters):
     df = pd.DataFrame(rn_dict).T
     
@@ -452,6 +461,7 @@ def get_rid_rnfea_dict(rn_dict, parameters):
 # Use for online features
 #
 #####################################################################################################
+# 从网格到道路 ID 的映射中，生成一个反向映射（即从道路 ID 到网格）
 def get_rid_grid_dict(grid_rn_dict):
     rid_grid_dict = {}
     for k, v in grid_rn_dict.items():
@@ -466,6 +476,11 @@ def get_rid_grid_dict(grid_rn_dict):
         
     return rid_grid_dict
 
+# 功能：生成在线特征字典，结合道路网络和 POI 特征。
+# 参数：
+# grid_rn_dict: 每个网格内包含的道路 ID 列表
+# norm_grid_poi_dict: 标准化的 POI 字典
+# norm_grid_rnfea_dict: 标准化后的道路特征字典
 def get_online_info_dict(grid_rn_dict, norm_grid_poi_dict, norm_grid_rnfea_dict, parameters):
     rid_grid_dict = get_rid_grid_dict(grid_rn_dict)
     online_features_dict = {}
@@ -489,6 +504,7 @@ def get_online_info_dict(grid_rn_dict, norm_grid_poi_dict, norm_grid_rnfea_dict,
 
     return online_features_dict
 
+# 批量获取输入 ID 对应的特征
 def get_dict_info_batch(input_id, features_dict):
     """
     batched dict info
@@ -507,6 +523,13 @@ def get_dict_info_batch(input_id, features_dict):
 # Use for visualization
 #
 #####################################################################################################
+# 功能：生成用于可视化的输入、预测和目标序列。
+# 参数：
+# raw_input: 原始输入
+# predict: 预测值
+# target: 目标值
+# src_len: 源长度列表
+# trg_len: 目标长度列表
 def get_plot_seq(raw_input, predict, target, src_len, trg_len):
     """
     Get input, prediction and ground truth GPS sequence.
@@ -539,6 +562,10 @@ def get_plot_seq(raw_input, predict, target, src_len, trg_len):
 # POIs
 #
 #####################################################################################################
+# 功能：过滤给定的 POI 数据框，保留位于边界框内的有效数据。
+# 参数：
+# df: 包含 POI 的数据框
+# mbr: 边界框
 def filterPOI(df, mbr):
     labels = ['公司企业', '美食', '运动健身', '教育培训', '购物', '政府机构', '旅游景点', '出入口', '房地产', '生活服务',
                   '交通设施', '汽车服务', '酒店', '丽人', '医疗', '文化传媒', '金融', '休闲娱乐', '道路','自然地物', '行政地标', '门址']
@@ -562,6 +589,11 @@ def filterPOI(df, mbr):
     return new_df
 
 
+# 功能：根据给定的边界框和网格大小，将 POI 数据框转换为标准化后的 POI 网格字典。
+# 参数：
+# mbr: 边界框
+# grid_size: 网格大小
+# df: 包含 POI 的数据框
 def get_poi_grid(mbr, grid_size, df):
     labels = ['company','food','shopping','viewpoint','house']
     new_df = filterPOI(df, mbr)
@@ -618,13 +650,17 @@ def get_poi_grid(mbr, grid_size, df):
 # others
 #
 #####################################################################################################
+# 功能：计算两个时间戳之间的分钟和秒数。
+# 参数：
+# start_time: 开始时间
+# end_time: 结束时间
 def epoch_time(start_time, end_time):
     elapsed_time = end_time - start_time
     elapsed_mins = int(elapsed_time / 60)
     elapsed_secs = int(elapsed_time - (elapsed_mins * 60))
     return elapsed_mins, elapsed_secs
 
-
+# 功能：定义一个继承自字典的类，使得可以通过点表示法访问字典中的键值。
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)

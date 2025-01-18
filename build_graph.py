@@ -10,13 +10,19 @@ from common.mbr import MBR
 
 def gps2grid(lat, lng, mbr, grid_size):
     """
-    mbr:
-        MBR class.
-    grid size:
-        int. in meter
+    Parameters:
+        lat: float. 纬度坐标。
+        lng: float. 经度坐标。
+        mbr: MBR class. 最小边界矩形对象，包含最大纬度、最小纬度、最大经度和最小经度。
+        grid_size: int. 网格大小（以米为单位）。
+
+    Returns:
+        locgrid_x, locgrid_y: int. 经过转换后的网格坐标。
     """
+    # 每米对应的经纬度变化
     LAT_PER_METER = 8.993203677616966e-06
     LNG_PER_METER = 1.1700193970443768e-05
+
     lat_unit = LAT_PER_METER * grid_size
     lng_unit = LNG_PER_METER * grid_size
     
@@ -32,6 +38,17 @@ def gps2grid(lat, lng, mbr, grid_size):
     return locgrid_x, locgrid_y
 
 def get_length_level_loc(raw_rn_dict, raw_eid, mbr, grid_size):
+    """
+    Parameters:
+        raw_rn_dict: dict. 道路网络字典，包含每个路段的详细信息。
+        raw_eid: str or int. 路段ID。
+        mbr: MBR class. 最小边界矩形对象，包含最大纬度、最小纬度、最大经度和最小经度。
+        grid_size: int. 网格大小（以米为单位）。
+
+    Returns:
+        start_lat, start_lng, end_lat, end_lng, length, level
+            起始网格坐标、结束网格坐标、路段长度和等级信息。
+    """
     raw_eid = str(raw_eid)
     length = raw_rn_dict[raw_eid]['length']
     level = raw_rn_dict[raw_eid]['level']
@@ -43,6 +60,20 @@ def get_length_level_loc(raw_rn_dict, raw_eid, mbr, grid_size):
     return start_lat, start_lng, end_lat, end_lng, length, level
 
 def build_global_POI_checkin_graph(dst_dir, new2raw_rid, raw_rn_dict, mbr, grid_size):
+    """
+    输入：
+    dst_dir：包含轨迹数据文件的目录。
+    new2raw_rid：新的道路 ID 到原始道路 ID 的映射。
+    raw_rn_dict：道路网络的详细信息字典。
+    mbr：最小边界矩形。
+    grid_size：网格大小。
+    步骤：
+    遍历 new2raw_rid，为每个道路段添加一个节点。
+    使用 ParseMMTraj 解析轨迹文件，提取候选点序列。
+    根据轨迹中的连续候选点，添加边到图中并累积权重。
+    输出：构建好的图 G。
+    """
+
     G = nx.DiGraph()
     maxn = 0
     # 第一步，顶点都在new2raw_rid中，先把所有节点加到图中
@@ -94,7 +125,7 @@ def build_global_POI_checkin_graph(dst_dir, new2raw_rid, raw_rn_dict, mbr, grid_
         # break  
     return G
 
-
+# 保存图的邻接矩阵和节点特征to csv
 def save_graph_to_csv(G, dst_dir):
     # Save graph to an adj matrix file and a nodes file
     # Adj matrix file: edge from row_idx to col_idx with weight; Rows and columns are ordered according to nodes file.
@@ -127,10 +158,11 @@ def save_graph_to_csv(G, dst_dir):
                   f'{length},{level},{freq_cnt}', file=f)
             # exit()
 
+# 保存图对象到pickle文件
 def save_graph_to_pickle(G, dst_dir):
     pickle.dump(G, open(os.path.join(dst_dir, 'graph.pkl'), 'wb'))
 
-
+# 保存图的边列表
 def save_graph_edgelist(G, dst_dir):
     nodelist = G.nodes()
     node_id2idx = {k: v for v, k in enumerate(nodelist)}
@@ -145,15 +177,16 @@ def save_graph_edgelist(G, dst_dir):
             
             print(f'{node_id2idx[src_node]} {node_id2idx[dst_node]} {weight}', file=f)
 
-
+# 加载邻接矩阵进行归一化处理
 def load_graph_adj_mtx(path):
     """A.shape: (num_node, num_node), edge from row_index to col_index with weight"""
     A = np.loadtxt(path, delimiter=',')
+    # 将非零元素设置为1，将零元素设置为一个小的数值（如1e-10）
     A[A!=0.] = 1.
     A[A==0.] = 1e-10
     # A = calculate_laplacian_matrix(A, 'hat_rw_normd_lap_mat')
     A1 = A
-    print(A1.shape)
+    print("graph shape:", A1.shape)
     # A2 = np.matmul(A,A)
     # A3 = np.matmul(A2,A)
     # A2[A2!=0.] = 1.
@@ -162,7 +195,7 @@ def load_graph_adj_mtx(path):
     
     return A1
 
- 
+# 加载节点特征进行归一化预处理
 def load_graph_node_features(path, feature1='start_lat', feature2='start_lng',
                              feature3='end_lat', feature4='end_lng', feature5='length', feature6='level'):
     """X.shape: (num_node, 4), four features: checkin cnt, poi cat, latitude, longitude"""
@@ -184,7 +217,7 @@ def load_graph_node_features(path, feature1='start_lat', feature2='start_lng',
     
     return final_x
 
-
+# 打印图的统计信息，如节点数、边数、度分布等
 def print_graph_statisics(G):
     print(f"Num of nodes: {G.number_of_nodes()}")
     print(f"Num of edges: {G.number_of_edges()}")
@@ -205,7 +238,7 @@ def print_graph_statisics(G):
     for i in range(0, 101, 20):
         print(f"Edge frequency ({i} percentile): {np.percentile(edge_weights, i)}")
 
-
+# 根据邻接矩阵计算不同类型的拉普拉斯矩阵
 def calculate_laplacian_matrix(adj_mat, mat_type):
     n_vertex = adj_mat.shape[0]
 
